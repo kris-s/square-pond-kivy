@@ -1,0 +1,171 @@
+#:kivy 1.8.0
+
+<Plant>
+    size_hint: None, None
+    size: self.mass, self.mass
+    canvas:
+        Color:
+            rgba: .72, 1, .66, .25
+        Ellipse:
+            pos: self.pos
+            size: self.size
+            
+<Square>
+    size_hint: None, None
+    size: self.mass, self.mass
+    canvas:
+        Color:
+            rgba: 1, 1, 1, .5
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Rectangle:
+            pos: self.pos[0]+self.width/4, self.pos[1]+self.height/4
+            size: self.size[0]/4, self.size[1]/4
+            
+<Tooth>
+    size_hint: None, None
+    size: self.mass, self.mass
+    canvas:
+        Color:
+            rgba: 1, .42, .31, .5
+        Rectangle:
+            pos: self.pos
+            size: self.size
+        Rectangle:
+            pos: self.pos[0]+self.width/4, self.pos[1]+self.height/2
+            size: self.size[0]/2, self.size[1]/4
+        Rectangle:
+            pos: self.pos[0]+self.width/2, self.pos[1]+self.height/4
+            size: self.size[0]/4, self.size[1]/4
+
+<Big>
+    size_hint: None,None
+    size: self.mass*2, self.mass
+    canvas:
+        Color:
+            rgba: .33, .74, 1, .5
+        Rectangle:
+            pos: self.pos[0], self.pos[1]+self.height*1/4
+            size: self.size[0], self.size[1]*4/8
+        Rectangle:
+            pos: self.pos[0]+self.width/16, self.pos[1]+self.height/8
+            size: self.size[0]* 1/4, self.size[1]*7/8
+        Rectangle:
+            pos: self.pos[0]+self.width*11/16, self.pos[1]+self.height/8
+            size: self.size[0]* 1/4, self.size[1]*7/8
+        Rectangle:
+            pos: self.pos[0]+self.width*3/8, self.pos[1]
+            size: self.size[0]* 1/4, self.size[1]*7/8            
+
+<Drifter>
+    size_hint: None,None
+    size: self.mass, self.mass*4
+    canvas:
+        Color:
+            rgba: .62, .98, .92, .5
+        Rectangle:
+            pos: self.pos[0]+self.width/3, self.pos[1]
+            size: self.size[0]/3, self.size[1]
+        Rectangle:
+            pos: self.pos[0], self.pos[1]+ self.height*1/64
+            size: self.size[0], self.size[1]*7/32
+        Rectangle:
+            pos: self.pos[0], self.pos[1]+ self.height*17/64
+            size: self.size[0], self.size[1]*7/32
+        Rectangle:
+            pos: self.pos[0], self.pos[1]+ self.height*33/64
+            size: self.size[0], self.size[1]*7/32
+        Rectangle:
+            pos: self.pos[0], self.pos[1]+ self.height*49/64
+            size: self.size[0], self.size[1]*7/32
+                        
+<Hide>
+    size_hint: None, None
+    size: self.mass, self.mass
+    canvas:
+        Color:
+            rgba: .86, .86, .14, .75
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<Apex>
+    size_hint: None, None
+    size: self.mass, self.mass
+    canvas:
+        Color:
+            rgba: .4, .4, .4, .75
+        Rectangle:
+            pos: self.pos
+            size: self.size[0]/5, self.size[1]/5
+        Rectangle:
+            pos: self.pos[0], self.pos[1]+self.height*4/5
+            size: self.size[0]/5, self.size[1]/5
+        Rectangle:
+            pos: self.pos[0]+self.width*4/5, self.pos[1]
+            size: self.size[0]/5, self.size[1]/5
+        Rectangle:
+            pos: self.pos[0]+self.width*4/5, self.pos[1]+self.height*4/5
+            size: self.size[0]/5, self.size[1]/5
+
+        Rectangle:
+            pos: self.pos[0]+self.width/10, self.pos[1]+self.height/10
+            size: self.size[0]*3/10, self.size[1]*3/10
+        Rectangle:
+            pos: self.pos[0]+self.width/10, self.pos[1]+self.height*3/5
+            size: self.size[0]*3/10, self.size[1]*3/10
+        Rectangle:
+            pos: self.pos[0]+self.width*3/5, self.pos[1]+self.height/10
+            size: self.size[0]*3/10, self.size[1]*3/10
+        Rectangle:
+            pos: self.pos[0]+self.width*3/5, self.pos[1]+self.height*3/5
+            size: self.size[0]*3/10, self.size[1]*3/10
+            
+        Rectangle:
+            pos: self.pos[0]+self.width*3/10, self.pos[1]+self.height*3/10
+            size: self.size[0]*2/5, self.size[1]*2/5
+<Menu>
+    size_hint: None, None
+    size: self.mass, self.mass
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            source: 'media/menu.png'
+            pos: self.pos
+            size: self.size
+
+<End>
+    size_hint: None, None
+    size: self.mass, self.mass
+    canvas:
+        Color:
+            rgba: 1, 1, 1, .75
+        Rectangle:
+            source: 'media/end.png'
+            pos: self.pos
+            size: self.size
+    Label:
+        size_hint: None, None
+        center_x: root.center_x
+        center_y: root.center_y-20
+        text: str(root.p_score)
+        font_size: 50
+        color: .71,.91,.89,1
+        
+    Label:
+        size_hint: None, None
+        center_x: root.center_x
+        center_y: root.center_y-110
+        text: str(root.a_score)
+        font_size: 50
+        color: .71,.91,.89,1
+
+<Game>
+    canvas:
+        Rectangle:
+            source: 'media/bluewater.jpg'
+            size: self.size
+            pos: self.pos
+

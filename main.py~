@@ -1,5 +1,10 @@
 import kivy
 kivy.require('1.8.0')
+
+from kivy.config import Config
+Config.set('graphics','width','1280')
+Config.set('graphics','height','720')
+
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
@@ -19,6 +24,12 @@ Square Pond - Version 0.9
 Copyright (C) 2014 Kris Shamloo
 
 Made with Kivy.
+
+Music and sound by Wes Shamloo
+http://braincat.bandcamp.com/
+
+Game by Kris Shamloo
+http://krisshamloo.com
 '''
 
 ########## Organism Classes ####################################################
@@ -106,6 +117,28 @@ class Square(Widget):
         self.mass -= d
         self.x += d/2
         self.y += d/2
+
+    def flee(self, attacker, t):
+        self.clock = t + 1
+        jx = attacker.center_x - self.center_x
+        jy = attacker.center_y - self.center_y
+        
+        if (abs(jx) >= abs(jy)):
+            if jx >= 0:
+                self.dx = -1.5
+                self.dy = (-1.5*jy)/abs(jx)
+            else:
+                self.dx = 1.5
+                self.dy = (-1.5*jy)/abs(jx)
+        elif (abs(jy) > abs(jx)):
+            if jy >= 0:
+                self.dy = -1.5
+                self.dx = (-1.5*jx)/abs(jy)
+            else:
+                self.dy = 1.5
+                self.dx = (-1.5*jx)/abs(jy)
+        else:
+            pass
 
 #--------- Tooth --------------------------------------------------------------#
 class Tooth(Widget):
@@ -264,7 +297,7 @@ class Big(Widget):
         self.leaving = True
         self.dy = uniform(-1, -0.5)
         self.dx = uniform(-0.5, 0.5)
-        
+      
     def flee(self, attacker, t):
         self.clock = t + 1
         jx = attacker.center_x - self.center_x
@@ -286,53 +319,29 @@ class Big(Widget):
                 self.dx = (-1.0*jx)/abs(jy)
         else:
             pass
+
+    def touchflee(self, touch, t):
+        self.clock = t + 1
+        jx = touch.x - self.center_x
+        jy = touch.y - self.center_y
         
-#--------- Hide ---------------------------------------------------------------#
-class Hide(Widget):
-
-    mass = NumericProperty(15.0)
-    bal = NumericProperty(1.0)
-    dx = NumericProperty(1.0)
-    dy = NumericProperty(1.0)
-    v = ReferenceListProperty(dx, dy)    
-    
-    clock = 0
-    shelterclock = 0
-    decay = 0.01
-    bound = False
-    leaving = False
-    caneat = True
-
-    type = 'Hide'
-
-    def move(self):
-        self.pos = Vector(*self.v) + self.pos
-    
-    def shelter(self, target, t):
-
-        # try to swim in the direction of discovered shelter
-        if target.center_x > self.center_x:
-            self.dx = uniform(.25, .5)
+        if (abs(jx) >= abs(jy)):
+            if jx >= 0:
+                self.dx = -1.0
+                self.dy = (-1.0*jy)/abs(jx)
+            else:
+                self.dx = 1.0
+                self.dy = (-1.0*jy)/abs(jx)
+        elif (abs(jy) > abs(jx)):
+            if jy >= 0:
+                self.dy = -1.0
+                self.dx = (-1.0*jx)/abs(jy)
+            else:
+                self.dy = 1.0
+                self.dx = (-1.0*jx)/abs(jy)
         else:
-            self.dx = uniform(-.5, -.25)        
-        if target.center_y > self.center_y:
-            self.dy = uniform(.25, .5)
-        else:
-            self.dy = uniform(-.5, -.25)
-            
-        self.shelterclock = t + target.mass/50
-       
-    def resume(self):
-        self.dx = uniform(-1.5, 1.5)
-        self.dy = uniform(-1.5, 1.5)
-        self.caneat = True
+            pass
         
-    def shrink(self):
-        d = self.decay * self.bal
-        self.mass -= d
-        self.x += d/2
-        self.y += d/2
-
 #--------- Drifter ------------------------------------------------------------#
 class Drifter(Widget):
 
@@ -361,9 +370,12 @@ class Drifter(Widget):
     def leave_slow(self):
         self.dy = uniform(-.1, -0.05)
         self.goslow = False
+        
+    def reverse(self):
+        if self.top < root.height:
+            self.dy = .5
 
-
-#--------- Apex --------------------------------------------------------------#
+#--------- Apex ---------------------------------------------------------------#
 class Apex(Widget):
 
     mass = NumericProperty(80.0)
@@ -526,9 +538,6 @@ class Game(Widget):
                     self.remove_widget(child)
                     self.cl.remove(child)
                     Clock.schedule_once(root.first_square)
-                    Clock.schedule_once(root.first_big)
-                    Clock.schedule_once(root.first_big)
-                    Clock.schedule_once(root.first_apex, 3)
                     Clock.schedule_interval(root.balance, 1.0)
                     self.canseed = True
                     self.a_score = 0
@@ -543,6 +552,11 @@ class Game(Widget):
 
                 elif child.type == 'Tooth':
                     child.freeze()
+                elif child.type == 'Big':
+                    t = Clock.get_boottime()
+                    child.touchflee(touch, t)    
+                elif child.type == 'Drifter':
+                    child.reverse()
 
                 return
                 
@@ -657,18 +671,6 @@ class Game(Widget):
 
         self.add_widget(d)
         self.cl.append(d)
-        
-    # create the first hide
-    def first_hide(self, dt):
-        h = Hide()
-        h.x = randint(self.width/4, 3*self.width/4)
-        h.y = randint(self.height+40,self.height+140)
-        h.clock = Clock.get_boottime()
-        h.dx = uniform(-1.0, 1.0)
-        h.dy = uniform(-1.0, -.5)
-
-        self.add_widget(h)
-        self.cl.append(h)
 
     # create the first apex
     def first_apex(self, dt):
@@ -713,8 +715,9 @@ class Game(Widget):
                                 self.squaresound = False
 
                         # teeth eat squares    
-                        if (self.cl[j].type == 'Tooth' and self.cl[j].caneat):
-                            if (self.cl[j].mass >= self.cl[i].mass):
+                        if (self.cl[j].type == 'Tooth'):
+                            self.cl[i].flee(self.cl[j], t)
+                            if (self.cl[j].mass >= self.cl[i].mass and self.cl[j].caneat):
                                 self.cl[j].eat(self.cl[i], t)
                                 kill.append(i)
                                 if self.eatsfx[8]:
@@ -728,6 +731,13 @@ class Game(Widget):
                         if (self.cl[j].type == 'Big' and self.cl[i].caneat):
                             self.cl[i].eat(self.cl[j], t)
                             kill.append(j)
+                        if (self.cl[j].type == 'Square'):
+                            self.cl[j].flee(self.cl[i], t)
+                            
+                    # bounce off of drifters
+                    if (self.cl[i].type == 'Drifter'):
+                        if (self.cl[j].type != 'Plant' and self.cl[j].type != 'Apex' and self.cl[j].type != 'Drifter' and self.cl[j].bound):
+                            self.cl[j].flee(self.cl[i], t)
 
                 # Apex hunting and prey fleeing, can hunt any tooth          
                 if (i != j and self.cl[i].type == 'Apex' and self.cl[j].type == 'Tooth'):
@@ -739,7 +749,7 @@ class Game(Widget):
 
                 # can hunt smaller bigs
                 if (i != j and self.cl[i].type == 'Apex' and self.cl[j].type == 'Big'):
-                    if (self.cl[i].mass > self.cl[j].mass):
+                    if (self.cl[i].mass-20 > self.cl[j].mass):
                         d = Vector(self.cl[i].center).distance(self.cl[j].center)
                         if (d < 300 and t > self.cl[i].huntclock and self.cl[i].bound):
                             self.cl[i].hunt(self.cl[j], t)
@@ -958,7 +968,7 @@ class Game(Widget):
             Clock.schedule_once(self.first_tooth)
             
         # create a big if conditions allow
-        if (teeth > 3 and squares > 20 and plants > 5 and t > self.bigclock):
+        if (teeth > 3 and squares > 20 and plants > 3 and t > self.bigclock):
             self.bigclock = t + 20
             Clock.schedule_once(self.first_big)
 
@@ -977,8 +987,8 @@ class Game(Widget):
             Square.bal = 1.0 - log10(squares)/2      
         
         # slow down tooth growth and decay
-        if (teeth > 0 and Tooth.bal > 0.01):
-            Tooth.bal = 1.0 - log10(teeth)/2
+        if (teeth > 0 and Tooth.bal > 0.2):
+            Tooth.bal = 1.0 - (teeth * .1)
 
         # limit total plants            
         if (plants >= 16):
@@ -1010,7 +1020,7 @@ class Game(Widget):
         if not self.squaresound:
             self.squaresound = True
  
-        # check win-state
+        # check lose-state
         if (squares < 1):
             print("You lost dude.")
             Clock.unschedule(self.update)
@@ -1024,6 +1034,7 @@ class Game(Widget):
             self.open_end(self)
 
         # debugging data
+        '''
         print("Total plants:",plants)
         print("Total squares:",squares)
         print("Total teeth:",teeth)
@@ -1031,6 +1042,7 @@ class Game(Widget):
         print("list should be",plants+squares+teeth+bigs+drifters+apexes)
         print("list length is", len(self.cl))
         print("FPS:", Clock.get_rfps())
+        '''
 
 ########## App Class ###########################################################        
 

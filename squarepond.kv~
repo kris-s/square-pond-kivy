@@ -79,16 +79,6 @@
         Rectangle:
             pos: self.pos[0], self.pos[1]+ self.height*49/64
             size: self.size[0], self.size[1]*7/32
-                        
-<Hide>
-    size_hint: None, None
-    size: self.mass, self.mass
-    canvas:
-        Color:
-            rgba: .86, .86, .14, .75
-        Rectangle:
-            pos: self.pos
-            size: self.size
 
 <Apex>
     size_hint: None, None

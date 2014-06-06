@@ -20,7 +20,7 @@ from math import log10
 '''
 ---Square Pond, an ecology game---
 
-Square Pond - Version 0.9
+Square Pond - Version 0.91
 Copyright (C) 2014 Kris Shamloo
 
 Made with Kivy.
@@ -29,7 +29,14 @@ Music and sound by Wes Shamloo
 http://braincat.bandcamp.com/
 
 Game by Kris Shamloo
-http://krisshamloo.com
+http://explorevulcan.com
+
+TODO
+balance teeth
+adjust big and drifter colors
+more organisms
+more complexity
+extend game border
 '''
 
 ########## Organism Classes ####################################################
@@ -476,7 +483,7 @@ class Menu(Widget):
     def move(self):
         self.pos = Vector(*self.v) + self.pos 
 
-#--------- End --------------------------------------------------------------#
+#--------- End ----------------------------------------------------------------#
 class End(Widget):
 
     mass = NumericProperty(400.0)
@@ -506,7 +513,7 @@ class Game(Widget):
     canhide = False
     canseed = False
     squaresound = True
-        
+    plantlimit = 16    
     ticks = 0
     a_score = 0
     p_score = 0
@@ -542,13 +549,16 @@ class Game(Widget):
                     self.canseed = True
                     self.a_score = 0
                     self.p_score = 0
+                    self.plantlimit = 16
                     
                     if self.start_sound:
-                        self.start_sound.play()
+                        #self.start_sound.play()
+                        pass
                         
                     if self.game_music:
-                        self.game_music.play()
-                        self.game_music.loop = True
+                        #self.game_music.play()
+                        #self.game_music.loop = True
+                        pass
 
                 elif child.type == 'Tooth':
                     child.freeze()
@@ -991,9 +1001,9 @@ class Game(Widget):
             Tooth.bal = 1.0 - (teeth * .1)
 
         # limit total plants            
-        if (plants >= 16):
+        if (plants >= self.plantlimit):
             self.canseed = False
-        elif (plants < 16):
+        elif (plants < self.plantlimit):
             self.canseed = True            
 
         # calculate score
@@ -1019,7 +1029,11 @@ class Game(Widget):
         # limit square sfx to once per second
         if not self.squaresound:
             self.squaresound = True
- 
+        
+        # reduce available seeds
+        if self.ticks > 60 and self.ticks % 20 == 0 and self.plantlimit > 0:
+            self.plantlimit -= 1
+            
         # check lose-state
         if (squares < 1):
             print("You lost dude.")
@@ -1060,4 +1074,3 @@ class SquarePond(App):
 ########## Giddyup #############################################################   
 if __name__ == '__main__':
     SquarePond().run()
-
